@@ -29,9 +29,6 @@ CMD_TYPE_ACK = 2
 
 BUFFER_SEGMENT_DATA_SIZE = 0x100000
 
-in_ep = None
-out_ep = None
-
 file_list = {}
 
 def LOG(line):
@@ -44,9 +41,9 @@ def process_file_range_command(data_size):
     global file_list
 
     LOG('File range')
-    out_ep.write(struct.pack('<4sIII', b'DBI0', CMD_TYPE_ACK, CMD_ID_FILE_RANGE, data_size))
+    dev.write(0x01, struct.pack('<4sIII', b'DBI0', CMD_TYPE_ACK, CMD_ID_FILE_RANGE, data_size))
 
-    file_range_header = in_ep.read(data_size)
+    file_range_header = dev.read(0x81, data_size)
 
     range_size = struct.unpack('<I', file_range_header[:4])[0]
     range_offset = struct.unpack('<Q', file_range_header[4:12])[0]
@@ -56,9 +53,9 @@ def process_file_range_command(data_size):
     LOG('Range Size: {}, Range Offset: {}, Name len: {}, Name: {}'.format(range_size, range_offset, nsp_name_len, nsp_name))
 
     response_bytes = struct.pack('<4sIII', b'DBI0', CMD_TYPE_RESPONSE, CMD_ID_FILE_RANGE, range_size)
-    out_ep.write(response_bytes)
+    dev.write(0x01, response_bytes)
 
-    ack = bytes(in_ep.read(16, timeout=0))
+    ack = bytes(dev.read(0x81, 16, timeout=0))
     magic = ack[:4]
     cmd_type = struct.unpack('<I', ack[4:8])[0]
     cmd_id = struct.unpack('<I', ack[8:12])[0]
@@ -79,14 +76,14 @@ def process_file_range_command(data_size):
                 read_size = end_off - curr_off
 
             buf = f.read(read_size)
-            out_ep.write(data=buf, timeout=0)
+            dev.write(0x01, data=buf, timeout=0)
             curr_off += read_size
 
 def poll_commands():
     LOG('Entering command loop')
     while True:
         try:
-            cmd_header = bytes(in_ep.read(16, timeout=0))
+            cmd_header = bytes(dev.read(0x81, 16, timeout=0))
             magic = cmd_header[:4]
 
             if magic != b'DBI0':
@@ -110,7 +107,7 @@ def poll_commands():
 
 def process_exit_command():
     LOG('Exit')
-    out_ep.write(struct.pack('<4sIII', b'DBI0', CMD_TYPE_RESPONSE, CMD_ID_EXIT, 0))
+    dev.write(0x01, struct.pack('<4sIII', b'DBI0', CMD_TYPE_RESPONSE, CMD_ID_EXIT, 0))
     global root
     root.quit()
 
@@ -127,10 +124,10 @@ def process_list_command():
     nsp_path_list_bytes = nsp_path_list.encode('utf-8')
     nsp_path_list_len = len(nsp_path_list_bytes)
 
-    out_ep.write(struct.pack('<4sIII', b'DBI0', CMD_TYPE_RESPONSE, CMD_ID_LIST, nsp_path_list_len))
+    dev.write(0x01, struct.pack('<4sIII', b'DBI0', CMD_TYPE_RESPONSE, CMD_ID_LIST, nsp_path_list_len))
 
     if nsp_path_list_len > 0:
-        ack = bytes(in_ep.read(16, timeout=0))
+        ack = bytes(dev.read(0x81, 16, timeout=0))
         magic = ack[:4]
         cmd_type = struct.unpack('<I', ack[4:8])[0]
         cmd_id = struct.unpack('<I', ack[8:12])[0]
@@ -139,12 +136,11 @@ def process_list_command():
         # LOG('Cmd Type: {}, Command id: {}, Data size: {}'.format(cmd_type, cmd_id, data_size))
         # LOG('Ack')
 
-        out_ep.write(nsp_path_list_bytes)
+        dev.write(0x01, nsp_path_list_bytes)
 
 def connect_to_switch():
-    global in_ep
-    global out_ep
     global text1
+    global dev
     while True:
         dev = usb.core.find(idVendor=0x057E, idProduct=0x3000)
         if dev is None:
@@ -152,19 +148,6 @@ def connect_to_switch():
             time.sleep(1)
             continue
 
-        dev.reset()
-        print('Waiting for switch reset...')
-        time.sleep(1)
-        dev.set_configuration()
-        cfg = dev.get_active_configuration()
-
-        is_out_ep = lambda ep: usb.util.endpoint_direction(ep.bEndpointAddress) == usb.util.ENDPOINT_OUT
-        is_in_ep = lambda ep: usb.util.endpoint_direction(ep.bEndpointAddress) == usb.util.ENDPOINT_IN
-        out_ep = usb.util.find_descriptor(cfg[(0,0)], custom_match=is_out_ep)
-        in_ep = usb.util.find_descriptor(cfg[(0,0)], custom_match=is_in_ep)
-
-        assert out_ep is not None
-        assert in_ep is not None
         break
 
 def start_server():
