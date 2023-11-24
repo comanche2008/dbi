@@ -65,14 +65,14 @@
 
 ## Установка 
 
-Поместите `dbi.nro` и `dbi.config` в папку `sdmc:/switch/DBI/` на вашей каре памяти. Запускайте из режима апплета с помощью Homebrew Launcher (через альбомы)
+Поместите `dbi.nro` и `dbi.config` в папку `sdmc:/switch/DBI/` на вашей каре памяти. Запускайте из режима апплета (через альбомы), или из режима тайтла с помощью Homebrew Launcher, или игры.
 
 *В режиме апплета программа запускается с синим фоном. В режиме тайла - с чёрным*
 
 ## Использование 
 
 ### Интерфейс
-![2021041010520200](https://user-images.githubusercontent.com/18294541/114262830-d7643e00-99ea-11eb-8dbb-c8e0996577e5.jpg)
+![Unknown_title_ 010000000000100d _20230101_020235_00](https://github.com/rashevskyv/dbi/assets/18294541/dfbf5e46-aea3-444c-92b1-ed866d75c0dc)
 * **Browse SD Card** / **Просмотр SD карты** — установка `NSP`/`NSZ`/`XCI`/`XCZ`-файлов из карты памяти.
 * **Browse USB0 Drive** / **Просмотр USB0 диска** — установка `NSP`/`NSZ`/`XCI`/`XCZ`-файлов с внешнего USB-накопителя в exFAT/FAT32: флешки, жёсткого диска, проч.
 * **Install title from DBIbackend** / **Установка через DBIbackend** — установка `NSP`/`NSZ`/`XCI`/`XCZ` из ПК по USB 2.0 и 3.0-проводу, через прилагаемую программу dbibackend. *Горячая клавиша для этой опции*: кнопка **(Y)**.
@@ -748,6 +748,10 @@ CalculateLFSSize=false
 CheckHash=true
 ; Use chunked HTTP transfer (good in bad environments)
 ChunkedTransfer=false
+; Allow NSZ/XCZ install in applet mode
+EnableNSZ=true
+; Create LFS folder in /atmosphere/contents after installation
+CreateLFS=true
 
 ; MTP options
 [MTP]

@@ -72,7 +72,7 @@ Copy `dbi.nro` and `dbi.config` to your SD card at `sdmc:/switch/DBI/` DBI can b
 ## Usage 
 
 ### Interface
-![2021041010520200](https://user-images.githubusercontent.com/18294541/114262830-d7643e00-99ea-11eb-8dbb-c8e0996577e5.jpg)
+![Unknown_title_ 010000000000100d _20230101_020235_00](https://github.com/rashevskyv/dbi/assets/18294541/dfbf5e46-aea3-444c-92b1-ed866d75c0dc)
 * **Browse SD Card** —  installation of `NSP`/`NSZ`/`XCI`/`XCZ` files from the memory card.
 * **Browse USB0 Drive** — installation of `NSP`/`NSZ`/`XCI`/`XCZ` files from an external exFAT/FAT32 USB drive, such as a flash drive, hard drive, etc.
 * **Install title from DBIbackend** installation of NSP/NSZ/XCI/XCZ files from a PC via USB 2.0 or 3.0 cable using the included program dbibackend. *Hotkey* for this option: **(Y)** button.
@@ -744,6 +744,10 @@ CalculateLFSSize=false
 CheckHash=true
 ; Use chunked HTTP transfer (good in bad environments)
 ChunkedTransfer=true
+; Allow NSZ/XCZ install in applet mode
+EnableNSZ=true
+; Create LFS folder in /atmosphere/contents after installation
+CreateLFS=true
 
 ; MTP options
 [MTP]
